@@ -296,6 +296,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           // Motivational quote
                           MotivationalQuote(),
 
+                          SizedBox(height: 16),
+
+                          // Powered by text
+                          Text(
+                            "Powered by Sahab Solutions",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+
                           SizedBox(
                             height: 80,
                           ), // Extra space for floating action button

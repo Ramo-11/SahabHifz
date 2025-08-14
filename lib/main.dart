@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/launch_screen.dart';
 import 'screens/name_setup_screen.dart';
 import 'services/storage_service.dart';
 
@@ -30,7 +31,7 @@ class AppInitializer extends StatelessWidget {
       future: StorageService.getUserName(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return LaunchScreen();
         }
 
         if (snapshot.data == null || snapshot.data!.isEmpty) {
