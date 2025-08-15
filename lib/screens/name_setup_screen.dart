@@ -3,6 +3,10 @@ import '../services/storage_service.dart';
 import 'home_screen.dart';
 
 class NameSetupScreen extends StatefulWidget {
+  final bool isEditing;
+
+  const NameSetupScreen({Key? key, this.isEditing = false}) : super(key: key);
+
   @override
   _NameSetupScreenState createState() => _NameSetupScreenState();
 }
@@ -11,6 +15,23 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _pagesController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditing) {
+      _loadCurrentData();
+    }
+  }
+
+  Future<void> _loadCurrentData() async {
+    final name = await StorageService.getUserName() ?? '';
+    final pages = await StorageService.getCompletedPages();
+    setState(() {
+      _nameController.text = name;
+      _pagesController.text = pages.toString();
+    });
+  }
 
   Future<void> _saveName() async {
     if (_nameController.text.trim().isEmpty) {
@@ -46,14 +67,28 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
     await StorageService.saveUserName(_nameController.text.trim());
     await StorageService.saveCompletedPages(completedPages);
 
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
+    if (widget.isEditing) {
+      Navigator.pop(context, true); // Return true to indicate changes were made
+    } else {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.isEditing
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Text(
+                "Edit Profile",
+                style: TextStyle(color: Colors.green[800]),
+              ),
+            )
+          : null,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -98,7 +133,9 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                       ),
                       SizedBox(height: 32),
                       Text(
-                        "What should we call you?",
+                        widget.isEditing
+                            ? "Update your information"
+                            : "What should we call you?",
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       SizedBox(height: 20),
@@ -129,7 +166,9 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                       ),
                       SizedBox(height: 20),
                       Text(
-                        "How many pages have you already completed? (Optional)",
+                        widget.isEditing
+                            ? "Update completed pages (Optional)"
+                            : "How many pages have you already completed? (Optional)",
                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         textAlign: TextAlign.center,
                       ),

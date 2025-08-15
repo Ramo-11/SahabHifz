@@ -6,6 +6,7 @@ import '../services/celebration_service.dart';
 import '../widgets/progress_circle.dart';
 import '../widgets/stats_card.dart';
 import '../widgets/motivational_quote.dart';
+import 'name_setup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -59,6 +60,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       pagesLeft = QuranData.totalPages - completedPages;
       userName = name;
     });
+  }
+
+  Future<void> _openSettings() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NameSetupScreen(isEditing: true)),
+    );
+
+    // If changes were made, reload the data
+    if (result == true) {
+      _loadData();
+    }
   }
 
   Future<void> _completePage() async {
@@ -132,42 +145,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _resetProgress() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Reset Progress"),
-          content: Text(
-            "Are you sure you want to reset your progress? This cannot be undone.",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await StorageService.resetProgress();
-                setState(() {
-                  completedPages = 0;
-                  pagesLeft = QuranData.totalPages;
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text("Reset", style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     double progress = completedPages / QuranData.totalPages;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green[50],
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.green[600], size: 20),
+            onPressed: _openSettings,
+            tooltip: "Edit Profile",
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -204,7 +198,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     minHeight:
                         MediaQuery.of(context).size.height -
                         MediaQuery.of(context).padding.top -
-                        MediaQuery.of(context).padding.bottom,
+                        MediaQuery.of(context).padding.bottom -
+                        kToolbarHeight,
                   ),
                   child: IntrinsicHeight(
                     child: Padding(
@@ -309,8 +304,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
 
                           SizedBox(
-                            height: 80,
-                          ), // Extra space for floating action button
+                            height: 24,
+                          ), // Reduced space since no floating action button
                         ],
                       ),
                     ),
@@ -320,12 +315,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _resetProgress,
-        backgroundColor: Colors.red[400],
-        child: Icon(Icons.refresh, color: Colors.white),
-        tooltip: "Reset Progress",
       ),
     );
   }
